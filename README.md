@@ -107,6 +107,11 @@ umount -R /mnt
 systemctl enable --now NetworkManager
 ```
 
+Всё что связано со звуком
+```
+pacman -S pipewire pipewire-pulse wireplumber
+```
+
 # Конфиги
 
 ```
