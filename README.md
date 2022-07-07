@@ -100,7 +100,7 @@ exit
 umount -R /mnt
 ```
 
-# Конфиги для i3-gaps picom alacritty
+# Конфиги
 
 ```
 ln -s $PWD/config/i3/config ~/.config/i3/config
