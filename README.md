@@ -38,3 +38,15 @@ mount -o noatime,compress=zstd,subvol=@home /dev/sda3 /mnt/home
 mount /dev/sda1 /mnt/boot/efi
 swapon /dev/sda2
 ```
+
+Установка базы
+```
+pacstrap /mnt base linux linux-firmware amd-ucode intel-ucode
+```
+(для бтрфс) Не забыть убрать fsck из **/etc/mkinitcpio.conf** и выполнить команду `mkinitcpio -P`
+
+Генерация фстаба
+```
+genfstab -U /mnt >> /mnt/etc/fstab
+```
+(для бтрфс) Из **/etc/fstab** убрать subvolid у монтированных сабволумов
