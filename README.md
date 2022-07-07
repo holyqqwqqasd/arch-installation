@@ -100,6 +100,13 @@ exit
 umount -R /mnt
 ```
 
+# Настройка рабочей системы
+
+Включить сеть
+```
+systemctl enable --now NetworkManager
+```
+
 # Конфиги
 
 ```
