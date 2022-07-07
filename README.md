@@ -99,3 +99,12 @@ pacman -S networkmanager
 exit
 umount -R /mnt
 ```
+
+# Конфиги для i3-gaps picom alacritty
+
+```
+ln -s $PWD/config/i3/config ~/.config/i3/config
+ln -s $PWD/config/picom/picom.conf ~/.config/picom/picom.conf
+ln -s $PWD/config/alacritty/alacritty.yml ~/.config/alacritty/alacritty.yml
+ln -s $PWD/config/.zshrc ~/.zshrc
+```
