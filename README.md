@@ -1,12 +1,14 @@
 # Установка арча
 
-Настройка времени и разметка диска
+Настройка времени
 ```
 timedatectl set-ntp true
-cfdisk --zero /dev/sda
 ```
 
 Разметить в GPT диск следующим образом:
+```
+cfdisk --zero /dev/sda
+```
   Partition | Type | Size | Mount
   --- | --- | --- | ---
   /dev/sda1 | EFI System | At least 300 MiB | /boot/efi
@@ -50,3 +52,19 @@ _(для бтрфс) Не забыть убрать fsck из HOOKS в **/etc/mk
 genfstab -U /mnt >> /mnt/etc/fstab
 ```
 _(для бтрфс) Из **/etc/fstab** убрать subvolid у монтированных сабволумов_
+
+Таймзона
+```
+ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+```
+
+Установить хардварные часы в UTC
+```
+hwclock --systohc
+```
+
+Локализация
+Предварительно поправить файл **/etc/locale.gen** и раскомментировать `en_US.UTF-8 UTF-8` и другие нужные языки
+```
+locale-gen
+```
