@@ -45,13 +45,18 @@ swapon /dev/sda2
 ```
 pacstrap /mnt base linux linux-firmware amd-ucode intel-ucode
 ```
-_**!!! для бтрфс !!!** Не забыть убрать fsck из HOOKS в **/etc/mkinitcpio.conf** и выполнить команду `mkinitcpio -P`_
+_**!!! для бтрфс !!!** Не забыть убрать fsck из HOOKS в **/etc/mkinitcpio.conf** и выполнить команду `mkinitcpio -P` когда арчрутнемся в систему_
 
 #### Генерация фстаба
 ```
 genfstab -U /mnt >> /mnt/etc/fstab
 ```
 _**!!! для бтрфс !!!** Из **/etc/fstab** убрать subvolid у монтированных сабволумов_
+
+#### chroot
+```
+arch-chroot /mnt
+```
 
 #### Таймзона
 ```
@@ -76,10 +81,15 @@ echo 'arch-pc' > /etc/hostname
 ```
 
 #### Загрузчик
-
 ```
 pacman -S grub efibootmgr
 grub-install --removable
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 Для установки из виртуалки, для grub-install нужна опция `--target=x86_64-efi`. Если установка происходит не на флешку, то надо убрать `--removable`
+
+#### Выходим и ребутаемся
+```
+exit
+umount -R /mnt
+```
