@@ -1,11 +1,11 @@
 # Установка арча
 
-Настройка времени
+#### Настройка времени
 ```
 timedatectl set-ntp true
 ```
 
-Разметить в GPT диск следующим образом:
+#### Разметить в GPT диск следующим образом:
 ```
 cfdisk --zero /dev/sda
 ```
@@ -22,7 +22,7 @@ mkswap /dev/sda2
 mkfs.btrfs -f /dev/sda3
 ```
 
-Создание сабволумов в бтрфс и их монтирование
+#### Создание сабволумов в бтрфс и их монтирование
 ```
 mount /dev/sda3 /mnt
 cd /mnt
@@ -41,30 +41,45 @@ mount /dev/sda1 /mnt/boot/efi
 swapon /dev/sda2
 ```
 
-Установка базы
+#### Установка базы
 ```
 pacstrap /mnt base linux linux-firmware amd-ucode intel-ucode
 ```
-_(для бтрфс) Не забыть убрать fsck из HOOKS в **/etc/mkinitcpio.conf** и выполнить команду `mkinitcpio -P`_
+_**!!! для бтрфс !!!** Не забыть убрать fsck из HOOKS в **/etc/mkinitcpio.conf** и выполнить команду `mkinitcpio -P`_
 
-Генерация фстаба
+#### Генерация фстаба
 ```
 genfstab -U /mnt >> /mnt/etc/fstab
 ```
-_(для бтрфс) Из **/etc/fstab** убрать subvolid у монтированных сабволумов_
+_**!!! для бтрфс !!!** Из **/etc/fstab** убрать subvolid у монтированных сабволумов_
 
-Таймзона
+#### Таймзона
 ```
 ln -sf /usr/share/zoneinfo/Europe/Moscow /etc/localtime
 ```
 
-Установить хардварные часы в UTC
+#### Установить хардварные часы в UTC
 ```
 hwclock --systohc
 ```
 
-Локализация
+#### Локализация
 Предварительно поправить файл **/etc/locale.gen** и раскомментировать `en_US.UTF-8 UTF-8` и другие нужные языки
 ```
 locale-gen
+echo 'LANG=en_US.UTF-8' > /etc/locale.conf
 ```
+
+#### Хостнейм
+```
+echo 'arch-pc' > /etc/hostname
+```
+
+#### Загрузчик
+
+```
+pacman -S grub efibootmgr
+grub-install --removable
+grub-mkconfig -o /boot/grub/grub.cfg
+```
+Для установки из виртуалки, для grub-install нужна опция `--target=x86_64-efi`. Если установка происходит не на флешку, то надо убрать `--removable`
