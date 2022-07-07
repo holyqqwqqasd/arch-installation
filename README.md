@@ -43,11 +43,10 @@ swapon /dev/sda2
 ```
 pacstrap /mnt base linux linux-firmware amd-ucode intel-ucode
 ```
-(для бтрфс) Не забыть убрать fsck из HOOKS в **/etc/mkinitcpio.conf** и выполнить команду `mkinitcpio -P`
+_(для бтрфс) Не забыть убрать fsck из HOOKS в **/etc/mkinitcpio.conf** и выполнить команду `mkinitcpio -P`_
 
 Генерация фстаба
 ```
 genfstab -U /mnt >> /mnt/etc/fstab
 ```
-(для бтрфс) Из **/etc/fstab** убрать subvolid у монтированных сабволумов
-
+_(для бтрфс) Из **/etc/fstab** убрать subvolid у монтированных сабволумов_
