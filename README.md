@@ -88,6 +88,12 @@ grub-mkconfig -o /boot/grub/grub.cfg
 ```
 Для установки из виртуалки, для grub-install нужна опция `--target=x86_64-efi`. Если установка происходит не на флешку, то надо убрать `--removable`
 
+#### Сеть
+```
+pacman -S networkmanager
+```
+Потом с nmtui включить его
+
 #### Выходим и ребутаемся
 ```
 exit
