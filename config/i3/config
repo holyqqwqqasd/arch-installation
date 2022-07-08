@@ -91,12 +91,12 @@ bindsym $mod+r mode "resize"
 # You can also use any non-zero value if you'd like to have a border
 for_window [class=".*"] border pixel 3
 
-client.focused              #bf616a #bf616a #d8dee8 #bf616a #bf616a
-client.focused_inactive     #8C484E #8C484E #d8dee8 #8C484E #8C484E
-client.unfocused            #8C484E #8C484E #d8dee8 #8C484E #8C484E
-client.urgent               #8C484E #8C484E #d8dee8 #8C484E #8C484E
-client.placeholder          #8C484E #8C484E #d8dee8 #8C484E #8C484E
-client.background           #8C484E
+client.focused          #282A2E #282A2E #D8DEE8 #282A2E   #282A2E
+client.focused_inactive #373B41 #373B41 #D8DEE8 #373B41   #373B41
+client.unfocused        #373B41 #373B41 #D8DEE8 #373B41   #373B41
+client.urgent           #373B41 #373B41 #D8DEE8 #373B41   #373B41
+client.placeholder      #373B41 #373B41 #D8DEE8 #373B41   #373B41
+client.background       #373B41
 
 # Gaps
 gaps inner 15
