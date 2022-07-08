@@ -108,4 +108,5 @@ ln -s $PWD/config/picom/picom.conf ~/.config/picom/picom.conf
 ln -s $PWD/config/alacritty/alacritty.yml ~/.config/alacritty/alacritty.yml
 ln -s $PWD/config/.zshrc ~/.zshrc
 ln -s $PWD/config/polybar/launch.sh ~/.config/polybar/launch.sh
+ln -s $PWD/config/polybar/config.ini ~/.config/polybar/config.ini
 ```
