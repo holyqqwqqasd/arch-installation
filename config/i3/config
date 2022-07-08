@@ -138,6 +138,8 @@ exec --no-startup-id nitrogen --restore
 
 exec_always --no-startup-id $HOME/.config/polybar/launch.sh
 
+exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+
 
 
 
