@@ -92,7 +92,7 @@ grub-mkconfig -o /boot/grub/grub.cfg
 ```
 pacman -S networkmanager
 ```
-Потом с nmtui включить его
+Потом через **nmtui** подключиться к сети
 
 #### Выходим и ребутаемся
 ```
@@ -102,12 +102,12 @@ umount -R /mnt
 
 # Настройка рабочей системы
 
-Включить сеть
+Включить сетевой сервис, потом через **nmtui** подключиться к сети
 ```
 systemctl enable --now NetworkManager
 ```
 
-Всё что связано со звуком
+Поставить всё что связано со звуком, потом включить через **systemctl start**
 ```
 pacman -S pipewire pipewire-pulse wireplumber
 ```
