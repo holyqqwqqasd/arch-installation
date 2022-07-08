@@ -99,7 +99,7 @@ client.placeholder          #8C484E #8C484E #d8dee8 #8C484E #8C484E
 client.background           #8C484E
 
 # Gaps
-gaps inner 30
+gaps inner 15
 
 
 
