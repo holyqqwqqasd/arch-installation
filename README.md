@@ -73,6 +73,7 @@ hwclock --systohc
 ```
 locale-gen
 echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+echo -e 'KEYMAP=ru\nFONT=cyr-sun16' > /etc/vconsole.conf
 ```
 
 #### Хостнейм
@@ -92,7 +93,6 @@ grub-mkconfig -o /boot/grub/grub.cfg
 ```
 pacman -S networkmanager
 ```
-Потом через **nmtui** подключиться к сети
 
 #### Выходим и ребутаемся
 ```
