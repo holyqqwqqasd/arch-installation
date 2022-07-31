@@ -94,10 +94,16 @@ grub-mkconfig -o /boot/grub/grub.cfg
 pacman -S networkmanager
 ```
 
+#### Не забыть установить руту пароль
+```
+passwd
+```
+
 #### Выходим и ребутаемся
 ```
 exit
 umount -R /mnt
+reboot
 ```
 
 # Настройка рабочей системы
