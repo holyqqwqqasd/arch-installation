@@ -113,7 +113,7 @@ reboot
 systemctl enable --now NetworkManager
 ```
 
-Поставить всё что связано со звуком, потом включить через **systemctl start** pipewire и wireplumber
+Поставить всё что связано со звуком, потом включить через **systemctl start --user** pipewire и wireplumber. Если нужен отдельная утилита для настройки аудио, то установить **pavucontrol**
 ```
 pacman -S pipewire pipewire-pulse wireplumber
 ```
