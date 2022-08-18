@@ -113,9 +113,14 @@ reboot
 systemctl enable --now NetworkManager
 ```
 
-Поставить всё что связано со звуком, потом включить через **systemctl start**
+Поставить всё что связано со звуком, потом включить через **systemctl start** pipewire и wireplumber
 ```
 pacman -S pipewire pipewire-pulse wireplumber
+```
+
+Поставить шрифты
+```
+pacman -S ttf-ubuntu-font-family noto-fonts noto-fonts-cjk noto-fonts-emoji
 ```
 
 # Конфиги
