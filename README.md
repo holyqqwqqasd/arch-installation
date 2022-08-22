@@ -108,14 +108,18 @@ reboot
 
 # Настройка рабочей системы
 
-Включить сетевой сервис, потом через **nmtui** подключиться к сети. Если нужен отдельный апплет, то установить **network-manager-applet**
+Включить сетевой сервис, потом подключиться к сети. Если нужен отдельный апплет, то установить **network-manager-applet**
 ```
 systemctl enable --now NetworkManager
+nmtui
 ```
 
-Поставить всё что связано со звуком, потом включить через **systemctl start --user** pipewire, wireplumber и pipewire-pulse. Если нужен отдельная утилита для настройки аудио, то установить **pavucontrol**
+Поставить всё что связано со звуком, затем запустить сервисы. Если нужен отдельная утилита для настройки аудио, то установить **pavucontrol** (ему нужен pipewire-pulse)
 ```
 pacman -S pipewire pipewire-pulse wireplumber
+systemctl start --user pipewire
+systemctl start --user wireplumber
+systemctl start --user pipewire-pulse
 ```
 
 Поставить шрифты
@@ -132,4 +136,22 @@ ln -s $PWD/config/alacritty/alacritty.yml ~/.config/alacritty/alacritty.yml
 ln -s $PWD/config/.zshrc ~/.zshrc
 ln -s $PWD/config/polybar/launch.sh ~/.config/polybar/launch.sh
 ln -s $PWD/config/polybar/config.ini ~/.config/polybar/config.ini
+```
+
+# Возможные нюансы
+
+* Если долго не обновлять систему, возможно все ключи протухнут. Тогда как вариант может помочь полное обновление ключей:
+```
+rm -rf /etc/pacman.d/gnupg/*
+sudo pacman -Scc
+sudo pacman-key --init
+sudo pacman-key --populate archlinux
+для проверки потом sudo pacman -Sy archlinux-keyring
+sudo pacman -Syu
+```
+либо можно попробовать так:
+```
+sudo pacman -Sy gnupg archlinux-keyring
+sudo pacman -Syu
+pacman-key –refresh-keys
 ```
