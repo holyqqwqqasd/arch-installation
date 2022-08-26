@@ -157,3 +157,18 @@ sudo pacman -Sy gnupg archlinux-keyring
 sudo pacman -Syu
 pacman-key –refresh-keys
 ```
+
+# Шифрование системы
+
+#### Разметка диска
+  Partition | Type | Size | Mount | FileSystem
+  --- | --- | --- | --- | ---
+  /dev/sda1 | EFI System | 300 MiB | /boot | FAT32
+  /dev/sda2 | Linux swap | More than 512 MiB | [SWAP] | [SWAP]
+  /dev/sda3 | Linux filesystem | Remainder of the device |  | crypto_LUKS
+  /dev/mapper/root |  |  | / | ext4
+
+
+### Известные проблемы с клавиатурой при загрузке
+
+* Хук **keyboard** необходимо поместить перед хуками: `autodetect` и `encrypt`
