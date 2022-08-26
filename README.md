@@ -160,7 +160,7 @@ pacman-key –refresh-keys
 
 # Шифрование системы
 
-#### Разметка диска
+### Разметка диска
 
   Partition | Type | Size | Mount | FileSystem
   --- | --- | --- | --- | ---
@@ -169,7 +169,7 @@ pacman-key –refresh-keys
   /dev/sda3 | Linux filesystem | Remainder of the device |  | crypto_LUKS
   /dev/mapper/root |  |  | / | ext4
 
-#### Форматирование созданных разделов
+### Форматирование созданных разделов
 
 ```
 mkfs.fat -F 32 /dev/sda1
@@ -185,8 +185,17 @@ mkfs.ext4 /dev/mapper/root
 
 дальше монтируем эти разделы как и обычно
 
-#### Настройка системы на использование шифрования
+### Настройка системы на использование шифрования
 
-### Известные проблемы с клавиатурой при загрузке
+Редактируем файл `/etc/mkinitcpio.conf` наша задача добавить в HOOKS:
+* `encrypt` после *block* но перед *filesystems*
+* `keyboard` перед *autodetect* и перед *encrypt*
 
-* Хук **keyboard** необходимо поместить перед хуками: `autodetect` и `encrypt`
+Затем заново генерируем initramfs `mkinitcpio -P`
+
+Редактируем файл `/etc/default/grub` добавляем туда значение для параметра GRUB_CMDLINE_LINUX (или GRUB_CMDLINE_LINUX_DEFAULT). В качестве UUID использовать значение шифрованного раздела `/dev/sda3`
+```
+GRUB_CMDLINE_LINUX="cryptdevice=UUID=00000000-0000-0000-0000-000000000000:root root=/dev/mapper/root"
+```
+Затем заново генерируем конфиг граба `grub-mkconfig -o /boot/grub/grub.cfg`
+
