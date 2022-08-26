@@ -161,6 +161,7 @@ pacman-key –refresh-keys
 # Шифрование системы
 
 #### Разметка диска
+
   Partition | Type | Size | Mount | FileSystem
   --- | --- | --- | --- | ---
   /dev/sda1 | EFI System | 300 MiB | /boot | FAT32
@@ -168,6 +169,23 @@ pacman-key –refresh-keys
   /dev/sda3 | Linux filesystem | Remainder of the device |  | crypto_LUKS
   /dev/mapper/root |  |  | / | ext4
 
+#### Форматирование созданных разделов
+
+```
+mkfs.fat -F 32 /dev/sda1
+mkswap /dev/sda2
+```
+
+**sda3** подгатавливаем иначе:
+```
+cryptsetup -v luksFormat /dev/sda3
+cryptsetup luksOpen /dev/sda3 root
+mkfs.ext4 /dev/mapper/root
+```
+
+дальше монтируем эти разделы как и обычно
+
+#### Настройка системы на использование шифрования
 
 ### Известные проблемы с клавиатурой при загрузке
 
