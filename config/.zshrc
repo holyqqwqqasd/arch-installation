@@ -13,3 +13,6 @@ PROMPT='%B%F{51}%T %n %~%f%b $ '
 
 bindkey '^[[H' beginning-of-line
 bindkey '^[[F' end-of-line
+bindkey ';5D' backward-word
+bindkey ';5C' forward-word
+bindkey '~' delete-char-or-list
