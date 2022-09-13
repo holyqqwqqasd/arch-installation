@@ -197,5 +197,9 @@ mkfs.ext4 /dev/mapper/root
 ```
 GRUB_CMDLINE_LINUX="cryptdevice=UUID=00000000-0000-0000-0000-000000000000:root root=/dev/mapper/root"
 ```
+еще пример (второй UUID это идентификатор расшифрованного раздела)
+```
+GRUB_CMDLINE_LINUX="cryptdevice=UUID=00000000-0000-0000-0000-000000000000:root root=UUID=00000000-0000-0000-0000-000000000000 rootflags=subvol=@ rw"
+```
 Затем заново генерируем конфиг граба `grub-mkconfig -o /boot/grub/grub.cfg`
 
