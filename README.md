@@ -83,7 +83,7 @@ echo 'arch-pc' > /etc/hostname
 
 #### Загрузчик
 ```
-pacman -S grub efibootmgr
+pacman -S grub
 grub-install --removable
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
