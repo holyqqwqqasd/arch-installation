@@ -1,10 +1,5 @@
 # Установка арча
 
-#### Настройка времени
-```
-timedatectl set-ntp true
-```
-
 #### Разметить в GPT диск следующим образом:
 ```
 cfdisk --zero /dev/sda
@@ -22,36 +17,34 @@ mkswap /dev/sda2
 mkfs.btrfs -f /dev/sda3
 ```
 
-#### Создание сабволумов в бтрфс и их монтирование
+#### Создание сабволумов и монтирование разделов
 ```
 mount /dev/sda3 /mnt
 cd /mnt
 btrfs subvolume create @
 btrfs subvolume create @home
+btrfs subvolume create @var_log
 cd /
 umount /mnt
-mount -o noatime,compress=zstd,subvol=@ /dev/sda3 /mnt
-mkdir -p /mnt/{home,boot/efi}
-mount -o noatime,compress=zstd,subvol=@home /dev/sda3 /mnt/home
-```
 
-Монтируем остальные разделы
-```
+mount -o noatime,compress=zstd,subvol=@ /dev/sda3 /mnt
+mkdir -p /mnt/{home,boot/efi,var/log}
+mount -o noatime,compress=zstd,subvol=@home /dev/sda3 /mnt/home
+mount -o noatime,compress=zstd,subvol=@var_log /dev/sda3 /mnt/var/log
 mount /dev/sda1 /mnt/boot/efi
 swapon /dev/sda2
 ```
 
 #### Установка базы
 ```
-pacstrap /mnt base linux linux-firmware amd-ucode intel-ucode
+pacstrap -K /mnt base linux linux-firmware
 ```
-_**!!! для бтрфс !!!** Не забыть убрать fsck из HOOKS в **/etc/mkinitcpio.conf** и выполнить команду `mkinitcpio -P` когда арчрутнемся в систему_
 
 #### Генерация фстаба
 ```
 genfstab -U /mnt >> /mnt/etc/fstab
 ```
-_**!!! для бтрфс !!!** Из **/etc/fstab** убрать subvolid у монтированных сабволумов_
+_Из **/etc/fstab** убрать subvolid у монтированных сабволумов_
 
 #### chroot
 ```
@@ -83,11 +76,11 @@ echo 'arch-pc' > /etc/hostname
 
 #### Загрузчик
 ```
-pacman -S grub
+pacman -S grub efibootmgr
 grub-install --removable
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
-Для установки из виртуалки, для grub-install нужна опция `--target=x86_64-efi`. Если установка происходит не на флешку, то надо убрать `--removable`
+Для установки из виртуалки, для grub-install нужна опция `--target=x86_64-efi` (а надо ли?). Если установка происходит не на флешку, то надо убрать `--removable`
 
 #### Сеть
 ```
@@ -121,6 +114,7 @@ systemctl start --user pipewire
 systemctl start --user wireplumber
 systemctl start --user pipewire-pulse
 ```
+(а надо ли pipewire-pulse?)
 
 Поставить шрифты
 ```
@@ -157,6 +151,7 @@ sudo pacman -Sy gnupg archlinux-keyring
 sudo pacman -Syu
 pacman-key –refresh-keys
 ```
+Еще вариант просто обновить archlinux-keyring и всё.
 
 # Шифрование системы
 
