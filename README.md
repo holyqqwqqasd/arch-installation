@@ -80,7 +80,7 @@ pacman -S grub efibootmgr
 grub-install --removable
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
-Для установки из виртуалки, для grub-install нужна опция `--target=x86_64-efi` (а надо ли?). Если установка происходит не на флешку, то надо убрать `--removable`
+Для установки из виртуалки, для grub-install нужна опция `--target=x86_64-efi` (если виртуалка грузилась не в UEFI моде). Если установка происходит не на флешку, то надо убрать `--removable` чтобы граб добавил запись в entry boot в UEFI.
 
 #### Сеть
 ```
@@ -121,22 +121,20 @@ systemctl start --user pipewire-pulse
 pacman -S ttf-ubuntu-font-family noto-fonts noto-fonts-cjk noto-fonts-emoji
 ```
 
-# Конфиги
-
+Для ноутбука поставить оптимизацию расходования заряда батареи:
 ```
-ln -s $PWD/config/i3/config ~/.config/i3/config
-ln -s $PWD/config/picom/picom.conf ~/.config/picom/picom.conf
-ln -s $PWD/config/alacritty/alacritty.yml ~/.config/alacritty/alacritty.yml
-ln -s $PWD/config/.zshrc ~/.zshrc
-ln -s $PWD/config/polybar/launch.sh ~/.config/polybar/launch.sh
-ln -s $PWD/config/polybar/config.ini ~/.config/polybar/config.ini
+pacman -S tlp
+systemctl enable --now tlp
+systemctl mask systemd-rfkill.service systemd-rfkill.socket
 ```
 
 # Возможные нюансы
 
 #### Проблема с ключами
 
-Если долго не обновлять систему, возможно все ключи протухнут. Тогда как вариант может помочь полное обновление ключей
+Нужно просто обновить archlinux-keyring.
+
+Еще вариант возможно поможет:
 ```
 rm -rf /etc/pacman.d/gnupg/*
 sudo pacman -Scc
@@ -151,40 +149,28 @@ sudo pacman -Sy gnupg archlinux-keyring
 sudo pacman -Syu
 pacman-key –refresh-keys
 ```
-Еще вариант просто обновить archlinux-keyring и всё.
+
+#### Пункт из бут меню пропадает
+
+Такое может быть когда либо материнка читает только первый EFI раздел а на другие забивает, либо когда по какой-то причине уефи не увидел диск и удалил все невалидные пункты бут меню.
 
 # Шифрование системы
 
-### Разметка диска
-
-  Partition | Type | Size | Mount | FileSystem
-  --- | --- | --- | --- | ---
-  /dev/sda1 | EFI System | 300 MiB | /boot | FAT32
-  /dev/sda2 | Linux swap | More than 512 MiB | [SWAP] | [SWAP]
-  /dev/sda3 | Linux filesystem | Remainder of the device |  | crypto_LUKS
-  /dev/mapper/root |  |  | / | ext4
-
 ### Форматирование созданных разделов
 
-```
-mkfs.fat -F 32 /dev/sda1
-mkswap /dev/sda2
-```
-
-**sda3** подгатавливаем иначе:
+Создаем и формутируем раздел который шифруем:
 ```
 cryptsetup -v luksFormat /dev/sda3
 cryptsetup luksOpen /dev/sda3 root
 mkfs.ext4 /dev/mapper/root
 ```
-
 дальше монтируем эти разделы как и обычно
 
 ### Настройка системы на использование шифрования
 
 Редактируем файл `/etc/mkinitcpio.conf` наша задача добавить в HOOKS:
 * `encrypt` после *block* но перед *filesystems*
-* `keyboard` перед *autodetect* и перед *encrypt*
+* `keyboard` перед *autodetect* и перед *encrypt* (но только если устанавливается на внешний диск, потому-что клавиатура запоминается только на том устройстве на котором была установка)
 
 Затем заново генерируем initramfs `mkinitcpio -P`
 
@@ -192,9 +178,4 @@ mkfs.ext4 /dev/mapper/root
 ```
 GRUB_CMDLINE_LINUX="cryptdevice=UUID=00000000-0000-0000-0000-000000000000:root root=/dev/mapper/root"
 ```
-еще пример (второй UUID это идентификатор расшифрованного раздела)
-```
-GRUB_CMDLINE_LINUX="cryptdevice=UUID=00000000-0000-0000-0000-000000000000:root root=UUID=00000000-0000-0000-0000-000000000000 rootflags=subvol=@ rw"
-```
 Затем заново генерируем конфиг граба `grub-mkconfig -o /boot/grub/grub.cfg`
-
