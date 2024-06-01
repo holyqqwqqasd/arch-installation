@@ -150,7 +150,7 @@ sudo pacman -Syu
 pacman-key –refresh-keys
 ```
 
-#### Пункт из бут меню пропадает
+#### Пункт из бут меню пропадает ИЛИ grub не находит раздел по uuid
 
 Такое может быть когда либо материнка читает только первый EFI раздел а на другие забивает, либо когда по какой-то причине уефи не увидел диск и удалил все невалидные пункты бут меню.
 
@@ -179,3 +179,52 @@ mkfs.ext4 /dev/mapper/root
 GRUB_CMDLINE_LINUX="cryptdevice=UUID=00000000-0000-0000-0000-000000000000:root root=/dev/mapper/root"
 ```
 Затем заново генерируем конфиг граба `grub-mkconfig -o /boot/grub/grub.cfg`
+
+# Пример конфигурации для корневой btrfs и шифрованного home
+
+Монтирую ефи раздел с первого диска с виндой (дуалбут).
+В корень монтируется бтрфс для снапшотов, логи убираю отдельно чтобы не снепшотить их.
+Домашний раздел шифрую и монтирую на этапе загрузки системы. Свап тоже самое но без пароля.
+```
+[karen@arch-pc ~]$ lsblk -f
+NAME        FSTYPE      FSVER LABEL UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
+nvme1n1                                                                                 
+├─nvme1n1p1 vfat        FAT32       594D-1280                                           
+├─nvme1n1p2                                                                             
+│ └─swap    swap        1     swap  69c0c0e6-e373-4924-9e95-97309356c0e4                [SWAP]
+├─nvme1n1p3 crypto_LUKS 2           f10b25ea-d676-4fd7-8104-838fad16eed9                
+│ └─home    ext4        1.0         0731a994-0138-4f65-8029-858420f691ad    263G     1% /home
+└─nvme1n1p4 btrfs                   182721eb-9ee3-4f4d-9d77-5ed5548eaebc  173.5G     3% /var/log
+                                                                                        /
+nvme0n1                                                                                 
+├─nvme0n1p1 vfat        FAT32       0669-998A                              35.4M    63% /efi
+├─nvme0n1p2                                                                             
+├─nvme0n1p3 ntfs                    16606AD9606ABF5D                                    
+└─nvme0n1p4 ntfs                    460CF1330CF11E9D                                    
+```
+
+Домашний раздел монтируется и расшифровывается грабом. А свап каждый раз перетирается рандомными данными при загрузке, и ключ берем просто случайный из рандома.
+```
+[karen@arch-pc ~]$ sudo cat /etc/crypttab 
+[sudo] password for karen: 
+
+home	UUID=f10b25ea-d676-4fd7-8104-838fad16eed9
+
+swap	PARTUUID=e8930692-64d0-4556-8ab4-8baba583bade	/dev/urandom	swap,cipher=aes-xts-plain64,size=256
+
+```
+
+```
+[karen@arch-pc ~]$ cat /etc/fstab 
+
+# BTRFS
+UUID=182721eb-9ee3-4f4d-9d77-5ed5548eaebc	/         	btrfs     	rw,noatime,compress=zstd:3,ssd,discard=async,space_cache=v2,subvol=/@	0 0
+UUID=182721eb-9ee3-4f4d-9d77-5ed5548eaebc	/var/log  	btrfs     	rw,noatime,compress=zstd:3,ssd,discard=async,space_cache=v2,subvol=/@var_log	0 0
+
+# Crypto LUKS
+/dev/mapper/home	/home     	ext4      	rw,noatime	0 2
+/dev/mapper/swap	none      	swap      	defaults  	0 0
+
+# /dev/nvme0n1p1
+UUID=0669-998A      	/efi      	vfat      	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro	0 2
+```
