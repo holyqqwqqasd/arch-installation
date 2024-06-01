@@ -39,6 +39,7 @@ swapon /dev/sda2
 ```
 pacstrap -K /mnt base linux linux-firmware
 ```
+Если надо не забыть про `amd-ucode` и или `intel-ucode`
 
 #### Генерация фстаба
 ```
@@ -65,7 +66,7 @@ hwclock --systohc
 Предварительно поправить файл **/etc/locale.gen** и раскомментировать `en_US.UTF-8 UTF-8` и другие нужные языки
 ```
 locale-gen
-echo 'LANG=en_US.UTF-8' > /etc/locale.conf
+echo 'LANG=en_GB.UTF-8' > /etc/locale.conf
 echo -e 'KEYMAP=ru\nFONT=cyr-sun16' > /etc/vconsole.conf
 ```
 
@@ -112,9 +113,8 @@ nmtui
 pacman -S pipewire pipewire-pulse wireplumber
 systemctl start --user pipewire
 systemctl start --user wireplumber
-systemctl start --user pipewire-pulse
+# systemctl start --user pipewire-pulse
 ```
-(а надо ли pipewire-pulse?)
 
 Поставить шрифты
 ```
