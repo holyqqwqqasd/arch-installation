@@ -63,7 +63,7 @@ hwclock --systohc
 ```
 
 #### Локализация
-Предварительно поправить файл **/etc/locale.gen** и раскомментировать `en_US.UTF-8 UTF-8` и другие нужные языки
+Предварительно поправить файл **/etc/locale.gen** и раскомментировать `en_GB.UTF-8 UTF-8` и другие нужные языки
 ```
 locale-gen
 echo 'LANG=en_GB.UTF-8' > /etc/locale.conf
@@ -78,10 +78,10 @@ echo 'arch-pc' > /etc/hostname
 #### Загрузчик
 ```
 pacman -S grub efibootmgr
-grub-install --removable
+grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
-Для установки из виртуалки, для grub-install нужна опция `--target=x86_64-efi` (если виртуалка грузилась не в UEFI моде). Если установка происходит не на флешку, то надо убрать `--removable` чтобы граб добавил запись в entry boot в UEFI.
+Для установки из виртуалки, для grub-install нужна опция `--target=x86_64-efi` (если виртуалка грузилась не в UEFI моде). Если установка происходит на флешку, то надо добавить `--removable` чтобы граб не добавлял запись в entry boot в UEFI. Ну и убедиться что EFI раздел монтирован в `/boot/efi` иначе надо указывать явный путь к нему.
 
 #### Сеть
 ```
@@ -102,18 +102,17 @@ reboot
 
 # Настройка рабочей системы
 
-Включить сетевой сервис, потом подключиться к сети. Если нужен отдельный апплет, то установить **network-manager-applet**
+Включить сетевой сервис, потом подключиться к сети.
 ```
 systemctl enable --now NetworkManager
 nmtui
 ```
 
-Поставить всё что связано со звуком, затем запустить сервисы. Если нужен отдельная утилита для настройки аудио, то установить **pavucontrol** (ему нужен pipewire-pulse)
+Поставить всё что связано со звуком, затем запустить сервисы.
 ```
-pacman -S pipewire pipewire-pulse wireplumber
+pacman -S pipewire wireplumber
 systemctl start --user pipewire
 systemctl start --user wireplumber
-# systemctl start --user pipewire-pulse
 ```
 
 Поставить шрифты
@@ -174,7 +173,7 @@ mkfs.ext4 /dev/mapper/root
 
 Затем заново генерируем initramfs `mkinitcpio -P`
 
-Редактируем файл `/etc/default/grub` добавляем туда значение для параметра GRUB_CMDLINE_LINUX (или GRUB_CMDLINE_LINUX_DEFAULT). В качестве UUID использовать значение шифрованного раздела `/dev/sda3`
+Редактируем файл `/etc/default/grub` добавляем туда значение для параметра GRUB_CMDLINE_LINUX. В качестве UUID использовать значение шифрованного раздела `/dev/sda3`
 ```
 GRUB_CMDLINE_LINUX="cryptdevice=UUID=00000000-0000-0000-0000-000000000000:root root=/dev/mapper/root"
 ```
@@ -227,4 +226,27 @@ UUID=182721eb-9ee3-4f4d-9d77-5ed5548eaebc	/var/log  	btrfs     	rw,noatime,compr
 
 # /dev/nvme0n1p1
 UUID=0669-998A      	/efi      	vfat      	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro	0 2
+```
+
+Пункты меню в конфиге GRUB:
+```
+menuentry 'Arch Linux' --class arch --class gnu-linux --class gnu --class os $menuentry_id_option 'gnulinux-simple-182721eb-9ee3-4f4d-9d77-5ed5548eaebc' {
+	load_video
+	set gfxpayload=keep
+	insmod gzio
+	insmod part_gpt
+	insmod btrfs
+	search --no-floppy --fs-uuid --set=root 182721eb-9ee3-4f4d-9d77-5ed5548eaebc
+	echo	'Loading Linux linux ...'
+	linux	/@/boot/vmlinuz-linux root=UUID=182721eb-9ee3-4f4d-9d77-5ed5548eaebc rw rootflags=subvol=@  loglevel=3 quiet
+	echo	'Loading initial ramdisk ...'
+	initrd	/@/boot/amd-ucode.img /@/boot/initramfs-linux.img
+}
+
+menuentry 'Windows Boot Manager (on /dev/nvme0n1p1)' --class windows --class os $menuentry_id_option 'osprober-efi-0669-998A' {
+	insmod part_gpt
+	insmod fat
+	search --no-floppy --fs-uuid --set=root 0669-998A
+	chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+}
 ```
