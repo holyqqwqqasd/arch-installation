@@ -133,9 +133,9 @@ pacman -S bluez
 systemctl enable --now bluetooth
 ```
 
-Для принтеров (system-config-printer для GNOME):
+Для принтера (system-config-printer для GNOME, hplip для HP принтеров):
 ```
-pacman -S cups system-config-printer
+pacman -S cups system-config-printer hplip
 systemctl enable --now cups.service
 ```
 
