@@ -127,6 +127,18 @@ systemctl enable --now tlp
 systemctl mask systemd-rfkill.service systemd-rfkill.socket
 ```
 
+Для Bluetooth:
+```
+pacman -S bluez
+systemctl enable --now bluetooth
+```
+
+Для принтеров (system-config-printer для GNOME):
+```
+pacman -S cups system-config-printer
+systemctl enable --now cups.service
+```
+
 # Возможные нюансы
 
 #### Проблема с ключами
