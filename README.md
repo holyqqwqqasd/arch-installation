@@ -82,10 +82,12 @@ grub-install
 grub-mkconfig -o /boot/grub/grub.cfg
 ```
 Для установки из виртуалки, для grub-install нужна опция `--target=x86_64-efi` (если виртуалка грузилась не в UEFI моде). Если установка происходит на флешку, то надо добавить `--removable` чтобы граб не добавлял запись в entry boot в UEFI. Ну и убедиться что EFI раздел монтирован в `/boot/efi` иначе надо указывать явный путь к нему.
+Через `efibootmgr` можно явно настроить порядок загрузки в UEFI и даже добавить новые entry boot.
 
 #### Сеть
 ```
 pacman -S networkmanager
+systemctl enable NetworkManager
 ```
 
 #### Не забыть установить руту пароль
@@ -102,7 +104,7 @@ reboot
 
 # Настройка рабочей системы
 
-Включить сетевой сервис, потом подключиться к сети.
+Включить сетевой сервис (если до этого не сделал), потом подключиться к сети.
 ```
 systemctl enable --now NetworkManager
 nmtui
@@ -144,26 +146,13 @@ systemctl enable --now cups.service
 #### Проблема с ключами
 
 Нужно просто обновить archlinux-keyring.
-
-Еще вариант возможно поможет:
 ```
-rm -rf /etc/pacman.d/gnupg/*
-sudo pacman -Scc
-sudo pacman-key --init
-sudo pacman-key --populate archlinux
-для проверки потом sudo pacman -Sy archlinux-keyring
-sudo pacman -Syu
-```
-либо можно попробовать так:
-```
-sudo pacman -Sy gnupg archlinux-keyring
-sudo pacman -Syu
-pacman-key –refresh-keys
+pacman -S archlinux-keyring
 ```
 
 #### Пункт из бут меню пропадает ИЛИ grub не находит раздел по uuid
 
-Такое может быть когда либо материнка читает только первый EFI раздел а на другие забивает, либо когда по какой-то причине уефи не увидел диск и удалил все невалидные пункты бут меню.
+Такое может быть когда по какой-то причине уефи не увидел диск и удалил все невалидные пункты бут меню.
 
 # Шифрование системы
 
@@ -193,41 +182,34 @@ GRUB_CMDLINE_LINUX="cryptdevice=UUID=00000000-0000-0000-0000-000000000000:root r
 
 # Пример конфигурации для корневой btrfs и шифрованного home
 
-Монтирую ефи раздел с первого диска с виндой (дуалбут).
-В корень монтируется бтрфс для снапшотов, логи убираю отдельно чтобы не снепшотить их.
+Монтирую нужный ефи раздел.
+В корень монтируется бтрфс для снапшотов, логи убираю отдельно чтобы не снапшотить их.
 Домашний раздел шифрую и монтирую на этапе загрузки системы. Свап тоже самое но без пароля.
 
 Для информации:
 * Ничего не указываю в HOOKS и вообще не трогаю ядро т.к. корневой раздел не зашифрован
-* Монтировать EFI раздел лучше в `/boot/efi`
+* Диски: **nvme0n1** с Linux, **nvme1n1** с Windows
+* Юиды: **UUID** юид файловой системы (может не быть, если в разделе нет фс), **PARTUUID** юид гпт раздела (может не быть для виртуальных девайсов)
+* В бут меню UEFI используются **PARTUUID** разделов для пути к `*.efi` файлам
 
 ```
-[karen@arch-pc ~]$ lsblk -f
-NAME        FSTYPE      FSVER LABEL UUID                                 FSAVAIL FSUSE% MOUNTPOINTS
-nvme1n1                                                                                 
-├─nvme1n1p1 vfat        FAT32       594D-1280                                           
-├─nvme1n1p2                                                                             
-│ └─swap    swap        1     swap  69c0c0e6-e373-4924-9e95-97309356c0e4                [SWAP]
-├─nvme1n1p3 crypto_LUKS 2           f10b25ea-d676-4fd7-8104-838fad16eed9                
-│ └─home    ext4        1.0         0731a994-0138-4f65-8029-858420f691ad    263G     1% /home
-└─nvme1n1p4 btrfs                   182721eb-9ee3-4f4d-9d77-5ed5548eaebc  173.5G     3% /var/log
-                                                                                        /
-nvme0n1                                                                                 
-├─nvme0n1p1 vfat        FAT32       0669-998A                              35.4M    63% /efi
-├─nvme0n1p2                                                                             
-├─nvme0n1p3 ntfs                    16606AD9606ABF5D                                    
-└─nvme0n1p4 ntfs                    460CF1330CF11E9D                                    
+[karen@arch-pc ~]$ lsblk -o +UUID,PARTUUID
+NAME        MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINTS UUID                                 PARTUUID
+nvme0n1     259:0    0 476.9G  0 disk                                                   
+├─nvme0n1p1 259:1    0   300M  0 part  /efi        594D-1280                            5b0aa7dc-9d35-4643-a1b9-7f50f6061eea
+├─nvme0n1p2 259:2    0    12G  0 part                                                   e8930692-64d0-4556-8ab4-8baba583bade
+│ └─swap    254:0    0    12G  0 crypt [SWAP]      42f65b50-10b8-4561-be91-1aefc20ee280 
+├─nvme0n1p3 259:3    0 284.9G  0 part              f10b25ea-d676-4fd7-8104-838fad16eed9 f3f9c238-4a6c-47a7-b982-052cf757c2be
+│ └─home    254:1    0 284.9G  0 crypt /home       0731a994-0138-4f65-8029-858420f691ad 
+└─nvme0n1p4 259:4    0 179.7G  0 part  /var/log    182721eb-9ee3-4f4d-9d77-5ed5548eaebc 95b219df-5b6a-47ab-b881-734d49a49a3e
+                                       /                                                
 ```
 
 Домашний раздел монтируется и расшифровывается грабом. А свап каждый раз перетирается рандомными данными при загрузке, и ключ берем просто случайный из рандома.
 ```
-[karen@arch-pc ~]$ sudo cat /etc/crypttab 
-[sudo] password for karen: 
-
+[karen@arch-pc ~]$ cat /etc/crypttab 
 home	UUID=f10b25ea-d676-4fd7-8104-838fad16eed9
-
 swap	PARTUUID=e8930692-64d0-4556-8ab4-8baba583bade	/dev/urandom	swap,cipher=aes-xts-plain64,size=256
-
 ```
 
 ```
@@ -241,8 +223,17 @@ UUID=182721eb-9ee3-4f4d-9d77-5ed5548eaebc	/var/log  	btrfs     	rw,noatime,compr
 /dev/mapper/home	/home     	ext4      	rw,noatime	0 2
 /dev/mapper/swap	none      	swap      	defaults  	0 0
 
-# /dev/nvme0n1p1
-UUID=0669-998A      	/efi      	vfat      	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro	0 2
+# EFI Partition
+UUID=594D-1280      	/efi      	vfat      	rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro	0 2
+```
+
+Пункты boot menu (все лишнее убрал из вывода):
+```
+[karen@arch-pc ~]$ efibootmgr 
+BootCurrent: 0004
+BootOrder: 0004,0003,2002,2001,2003
+Boot0004* Arch Linux	HD(1,GPT,5b0aa7dc-9d35-4643-a1b9-7f50f6061eea,0x800,0x96000)/\EFI\arch\grubx64.efi
+. . .
 ```
 
 Пункты меню в конфиге GRUB:
@@ -255,15 +246,17 @@ menuentry 'Arch Linux' --class arch --class gnu-linux --class gnu --class os $me
 	insmod btrfs
 	search --no-floppy --fs-uuid --set=root 182721eb-9ee3-4f4d-9d77-5ed5548eaebc
 	echo	'Loading Linux linux ...'
-	linux	/@/boot/vmlinuz-linux root=UUID=182721eb-9ee3-4f4d-9d77-5ed5548eaebc rw rootflags=subvol=@  loglevel=3 quiet
+	linux	/@/boot/vmlinuz-linux root=UUID=182721eb-9ee3-4f4d-9d77-5ed5548eaebc rw rootflags=subvol=@ reboot=efi loglevel=3 quiet
 	echo	'Loading initial ramdisk ...'
 	initrd	/@/boot/amd-ucode.img /@/boot/initramfs-linux.img
 }
 
+### BEGIN /etc/grub.d/30_os-prober ###
 menuentry 'Windows Boot Manager (on /dev/nvme0n1p1)' --class windows --class os $menuentry_id_option 'osprober-efi-0669-998A' {
 	insmod part_gpt
 	insmod fat
 	search --no-floppy --fs-uuid --set=root 0669-998A
 	chainloader /EFI/Microsoft/Boot/bootmgfw.efi
 }
+### END /etc/grub.d/30_os-prober ###
 ```
