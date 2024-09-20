@@ -141,6 +141,11 @@ pacman -S cups system-config-printer hplip
 systemctl enable --now cups.service
 ```
 
+Переключение языка на Shift+Alt в GNOME:
+```
+gsettings set org.gnome.desktop.wm.keybindings switch-input-source "['<Shift>Alt_L']"
+```
+
 # Возможные нюансы
 
 #### Проблема с ключами
