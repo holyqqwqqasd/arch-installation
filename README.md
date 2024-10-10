@@ -251,7 +251,7 @@ menuentry 'Arch Linux' --class arch --class gnu-linux --class gnu --class os $me
 	insmod btrfs
 	search --no-floppy --fs-uuid --set=root 182721eb-9ee3-4f4d-9d77-5ed5548eaebc
 	echo	'Loading Linux linux ...'
-	linux	/@/boot/vmlinuz-linux root=UUID=182721eb-9ee3-4f4d-9d77-5ed5548eaebc rw rootflags=subvol=@ reboot=efi loglevel=3 quiet
+	linux	/@/boot/vmlinuz-linux root=UUID=182721eb-9ee3-4f4d-9d77-5ed5548eaebc rw rootflags=subvol=@ loglevel=3 quiet
 	echo	'Loading initial ramdisk ...'
 	initrd	/@/boot/amd-ucode.img /@/boot/initramfs-linux.img
 }
